@@ -65,7 +65,7 @@ if "incentivo_atual" not in st.session_state:
 # Barra Lateral (Sidebar) com estilo Dev & Gamer
 with st.sidebar:
     st.markdown("### 💻 Pluto.sys")
-    st.caption("v2.5 // AI Assistant Core")
+    st.caption("v2.6 // AI Assistant Core")
     st.markdown("---")
     
     st.markdown("**Status do Sistema:** 🟢 Online")
@@ -119,7 +119,7 @@ else:
         with st.chat_message("user", avatar="⚡"):
             st.markdown(prompt)
 
-        # Resposta da IA usando o modelo atualizado correto
+        # Resposta da IA usando o modelo obrigatório gemini-3.8-flash
         with st.chat_message("assistant", avatar="💻"):
             with st.spinner("Processando dados..."):
                 try:
@@ -131,7 +131,7 @@ else:
                     )
 
                     response = client.models.generate_content(
-                        model='gemini-2.0-flash',
+                        model='gemini-3.8-flash',
                         contents=prompt,
                         config={
                             'system_instruction': system_instruction
@@ -143,4 +143,4 @@ else:
                     # Adiciona a resposta da IA no histórico visual
                     st.session_state.messages.append({"role": "assistant", "content": ai_response})
                 except Exception as e:
-                    st.error(f"Erro na execução: {e}")
+                    st.error(f"Erro na execução: {e}. Se persistir por pico de demanda, aguarde alguns segundos e tente novamente.")
