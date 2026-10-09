@@ -65,7 +65,7 @@ if "incentivo_atual" not in st.session_state:
 # Barra Lateral (Sidebar) com estilo Dev & Gamer
 with st.sidebar:
     st.markdown("### 💻 Pluto.sys")
-    st.caption("v2.1 // AI Assistant Core")
+    st.caption("v2.2 // AI Assistant Core")
     st.markdown("---")
     
     st.markdown("**Status do Sistema:** 🟢 Online")
@@ -80,11 +80,9 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Botão para limpar a conversa e resetar o chat
+    # Botão para limpar a conversa
     if st.button("⚡ Resetar Sessão"):
         st.session_state.messages = []
-        if "chat_session" in st.session_state:
-            del st.session_state.chat_session
         st.session_state.incentivo_atual = random.choice(incentivos_do_dia)
         st.rerun()
 
@@ -116,15 +114,6 @@ else:
         "Nunca se apresente como Gemini ou Google — você é o Pluto, criado por Cauã Luppe - Zeinxa."
     )
 
-    # Inicializa a sessão de chat contínuo se ela não existir
-    if "chat_session" not in st.session_state:
-        st.session_state.chat_session = client.chats.create(
-            model="gemini-3.8-flash",
-            config={
-                'system_instruction': system_instruction
-            }
-        )
-
     # Exibe o histórico de conversas na interface
     for message in st.session_state.messages:
         avatar = "💻" if message["role"] == "assistant" else "⚡"
@@ -138,12 +127,27 @@ else:
         with st.chat_message("user", avatar="⚡"):
             st.markdown(prompt)
 
-        # Resposta da IA usando o chat contínuo
+        # Resposta da IA recriando a sessão com o histórico atual para evitar erros de conexão fechada
         with st.chat_message("assistant", avatar="💻"):
             with st.spinner("Processando dados..."):
                 try:
-                    # Envia a mensagem mantendo o contexto da conversa inteira
-                    response = st.session_state.chat_session.send_message(prompt)
+                    # Converte o histórico do Streamlit para o formato aceito pelo chats.create
+                    chat_history = [
+                        {"role": m["role"], "parts": [m["content"]]} 
+                        for m in st.session_state.messages[:-1] # Pega tudo menos a última mensagem que vai ser enviada agora
+                    ]
+
+                    # Cria a sessão de chat injetando o histórico anterior
+                    chat = client.chats.create(
+                        model="gemini-3.8-flash",
+                        history=chat_history if chat_history else None,
+                        config={
+                            'system_instruction': system_instruction
+                        }
+                    )
+
+                    # Envia a nova mensagem do usuário
+                    response = chat.send_message(prompt)
                     ai_response = response.text
                     st.markdown(ai_response)
                     
