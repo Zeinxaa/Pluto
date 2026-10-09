@@ -65,7 +65,7 @@ if "incentivo_atual" not in st.session_state:
 # Barra Lateral (Sidebar) com estilo Dev & Gamer
 with st.sidebar:
     st.markdown("### 💻 Pluto.sys")
-    st.caption("v2.2 // AI Assistant Core")
+    st.caption("v2.3 // AI Assistant Core")
     st.markdown("---")
     
     st.markdown("**Status do Sistema:** 🟢 Online")
@@ -106,14 +106,6 @@ else:
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Instrução de sistema fixa do Pluto
-    system_instruction = (
-        "Você se chama Pluto. Sua história de origem é que você foi forjado nas linhas de código e na dedicação "
-        "de um jovem programador focado em evoluir, o seu criador oficial: Cauã Luppe (Zeinxa). "
-        "Você tem uma vibe dev, minimalista, inteligente, amigável, curte games e programação, e está sempre pronto para ajudar o Cauã a construir ideias do zero. "
-        "Nunca se apresente como Gemini ou Google — você é o Pluto, criado por Cauã Luppe - Zeinxa."
-    )
-
     # Exibe o histórico de conversas na interface
     for message in st.session_state.messages:
         avatar = "💻" if message["role"] == "assistant" else "⚡"
@@ -127,27 +119,24 @@ else:
         with st.chat_message("user", avatar="⚡"):
             st.markdown(prompt)
 
-        # Resposta da IA recriando a sessão com o histórico atual para evitar erros de conexão fechada
+        # Resposta da IA com o método padrão e seguro
         with st.chat_message("assistant", avatar="💻"):
             with st.spinner("Processando dados..."):
                 try:
-                    # Converte o histórico do Streamlit para o formato aceito pelo chats.create
-                    chat_history = [
-                        {"role": m["role"], "parts": [m["content"]]} 
-                        for m in st.session_state.messages[:-1] # Pega tudo menos a última mensagem que vai ser enviada agora
-                    ]
+                    system_instruction = (
+                        "Você se chama Pluto. Sua história de origem é que você foi forjado nas linhas de código e na dedicação "
+                        "de um jovem programador focado em evoluir, o seu criador oficial: Cauã Luppe (Zeinxa). "
+                        "Você tem uma vibe dev, minimalista, inteligente, amigável, curte games e programação, e está sempre pronto para ajudar o Cauã a construir ideias do zero. "
+                        "Nunca se apresente como Gemini ou Google — você é o Pluto, criado por Cauã Luppe - Zeinxa."
+                    )
 
-                    # Cria a sessão de chat injetando o histórico anterior
-                    chat = client.chats.create(
-                        model="gemini-3.8-flash",
-                        history=chat_history if chat_history else None,
+                    response = client.models.generate_content(
+                        model='gemini-3.8-flash',
+                        contents=prompt,
                         config={
                             'system_instruction': system_instruction
                         }
                     )
-
-                    # Envia a nova mensagem do usuário
-                    response = chat.send_message(prompt)
                     ai_response = response.text
                     st.markdown(ai_response)
                     
