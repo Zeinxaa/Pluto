@@ -108,7 +108,7 @@ else:
 
     # Exibe o histórico de conversas
     for message in st.session_state.messages:
-        avatar = "💻" fui = "💻" if message["role"] == "assistant" else "⚡"
+        avatar = "💻" if message["role"] == "assistant" else "⚡"
         with st.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
@@ -123,7 +123,7 @@ else:
         with st.chat_message("assistant", avatar="💻"):
             with st.spinner("Processando dados..."):
                 try:
-                    # Instrução de sistema atualizada com a história e o criador
+                    # Instrução de sistema com a identidade e o criador corretos
                     system_instruction = (
                         "Você se chama Pluto. Sua história de origem é que você foi forjado nas linhas de código e na dedicação "
                         "de um jovem programador focado em evoluir, o seu criador oficial: Cauã Luppe (Zeinxa). "
