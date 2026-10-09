@@ -2,17 +2,19 @@ import streamlit as st
 from google import genai
 
 # Configuração da página
-st.set_page_config(page_title="Pluto dos Ovao Inteligente", page_icon="🤖🐕")
+st.set_page_config(page_title="Pluto - Minha IA", page_icon="🤖")
 
-st.title("🐕 Pluto")
-st.write("Seu cachorro Ovudo Inteligente.")
+st.title("🤖 Pluto")
+st.write("Seu assistente pessoal inteligente.")
 
-# Campo para a chave da API do Gemini na barra lateral
-st.sidebar.header("Configurações")
-api_key = st.sidebar.text_input("Insira sua Gemini API Key:", type="password")
+# Puxa a chave de forma oculta direto do Streamlit Cloud
+try:
+    api_key = st.secrets["GEMINI_API_KEY"]
+except Exception:
+    api_key = None
 
 if not api_key:
-    st.warning("Por favor, insira sua chave da API do Gemini na barra lateral para continuar.")
+    st.error("A chave da API do Gemini não foi configurada nos segredos do Streamlit Cloud.")
 else:
     # Inicializa o cliente do Gemini
     client = genai.Client(api_key=api_key)
@@ -35,7 +37,6 @@ else:
         # Resposta da IA
         with st.chat_message("assistant"):
             try:
-                # Usando o modelo padrão recomendado
                 response = client.models.generate_content(
                     model='gemini-3.8-flash',
                     contents=prompt,
