@@ -65,7 +65,7 @@ if "incentivo_atual" not in st.session_state:
 # Barra Lateral (Sidebar) com estilo Dev & Gamer
 with st.sidebar:
     st.markdown("### 💻 Pluto.sys")
-    st.caption("v2.0 // AI Assistant Core")
+    st.caption("v2.1 // AI Assistant Core")
     st.markdown("---")
     
     st.markdown("**Status do Sistema:** 🟢 Online")
@@ -80,9 +80,11 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Botão para limpar a conversa
+    # Botão para limpar a conversa e resetar o chat
     if st.button("⚡ Resetar Sessão"):
         st.session_state.messages = []
+        if "chat_session" in st.session_state:
+            del st.session_state.chat_session
         st.session_state.incentivo_atual = random.choice(incentivos_do_dia)
         st.rerun()
 
@@ -102,11 +104,28 @@ else:
     # Inicializa o cliente do Gemini
     client = genai.Client(api_key=api_key)
 
-    # Inicializa o histórico de mensagens
+    # Inicializa o histórico de mensagens da tela
     if "messages" not in st.session_state:
         st.session_state.messages = []
 
-    # Exibe o histórico de conversas
+    # Instrução de sistema fixa do Pluto
+    system_instruction = (
+        "Você se chama Pluto. Sua história de origem é que você foi forjado nas linhas de código e na dedicação "
+        "de um jovem programador focado em evoluir, o seu criador oficial: Cauã Luppe (Zeinxa). "
+        "Você tem uma vibe dev, minimalista, inteligente, amigável, curte games e programação, e está sempre pronto para ajudar o Cauã a construir ideias do zero. "
+        "Nunca se apresente como Gemini ou Google — você é o Pluto, criado por Cauã Luppe - Zeinxa."
+    )
+
+    # Inicializa a sessão de chat contínuo se ela não existir
+    if "chat_session" not in st.session_state:
+        st.session_state.chat_session = client.chats.create(
+            model="gemini-3.8-flash",
+            config={
+                'system_instruction': system_instruction
+            }
+        )
+
+    # Exibe o histórico de conversas na interface
     for message in st.session_state.messages:
         avatar = "💻" if message["role"] == "assistant" else "⚡"
         with st.chat_message(message["role"], avatar=avatar):
@@ -114,33 +133,21 @@ else:
 
     # Entrada de texto do usuário
     if prompt := st.chat_input("Digite um comando ou dúvida para o Pluto..."):
-        # Adiciona mensagem do usuário
+        # Adiciona mensagem do usuário no histórico visual
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user", avatar="⚡"):
             st.markdown(prompt)
 
-        # Resposta da IA com indicador de carregamento
+        # Resposta da IA usando o chat contínuo
         with st.chat_message("assistant", avatar="💻"):
             with st.spinner("Processando dados..."):
                 try:
-                    # Instrução de sistema com a identidade e o criador corretos
-                    system_instruction = (
-                        "Você se chama Pluto. Sua história de origem é que você foi forjado nas linhas de código e na dedicação "
-                        "de um jovem programador focado em evoluir, o seu criador oficial: Cauã Luppe (Zeinxa). "
-                        "Você tem uma vibe dev, minimalista, inteligente, amigável, curte games e programação, e está sempre pronto para ajudar o Cauã a construir ideias do zero. "
-                        "Nunca se apresente como Gemini ou Google — você é o Pluto, criado por Cauã Luppe - Zeinxa."
-                    )
-
-                    response = client.models.generate_content(
-                        model='gemini-3.8-flash',
-                        contents=prompt,
-                        config={
-                            'system_instruction': system_instruction
-                        }
-                    )
+                    # Envia a mensagem mantendo o contexto da conversa inteira
+                    response = st.session_state.chat_session.send_message(prompt)
                     ai_response = response.text
                     st.markdown(ai_response)
-                    # Adiciona resposta ao histórico
+                    
+                    # Adiciona a resposta da IA no histórico visual
                     st.session_state.messages.append({"role": "assistant", "content": ai_response})
                 except Exception as e:
                     st.error(f"Erro na execução: {e}")
