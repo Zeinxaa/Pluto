@@ -1,4 +1,5 @@
 import streamlit as st
+import random
 from google import genai
 
 # Configuração da página
@@ -20,7 +21,7 @@ st.markdown("""
     /* Ajuste da barra lateral */
     [data-testid="stSidebar"] {
         background-color: #0d1117;
-        border-right: 1px. solid #30363d;
+        border-right: 1px solid #30363d;
     }
 
     /* Estilização das caixas de mensagem do chat */
@@ -48,6 +49,19 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Lista de ganchos / incentivos para puxar assunto (Dev & Games)
+incentivos_do_dia = [
+    "🚀 **Missão de Hoje:** E se a gente criasse um script em Python para automatizar alguma tarefa chata do seu dia?",
+    "🎮 **Papo de Gamer:** Qual jogo marcou mais a sua vida ou qual você está jogando e achou a programação/história fascinante?",
+    "💡 **Desafio de Lógica:** Bora tentar entender como funcionam loops e condicionais criando um minijogo de adivinhação no terminal?",
+    "👾 **Curiosidade Dev:** Você já parou para pensar em como os desenvolvedores otimizam gráficos pesados em jogos de mundo aberto?",
+    "⚡ **Foco no Código:** Me conta o que você está tentando aprender ou construir hoje para a gente destrinchar passo a passo!"
+]
+
+# Seleciona um incentivo aleatório para aparecer na sessão
+if "incentivo_atual" not in st.session_state:
+    st.session_state.incentivo_atual = random.choice(incentivos_do_dia)
+
 # Barra Lateral (Sidebar) com estilo Dev & Gamer
 with st.sidebar:
     st.markdown("### 💻 Pluto.sys")
@@ -60,13 +74,18 @@ with st.sidebar:
     
     st.markdown("---")
     
+    # Caixa de Incentivo / Conversa do Dia
+    st.markdown("#### 🎯 Incentivo do Dia")
+    st.info(st.session_state.incentivo_atual)
+    
+    st.markdown("---")
+    
     # Botão para limpar a conversa
     if st.button("⚡ Resetar Sessão"):
         st.session_state.messages = []
+        # Troca o incentivo ao resetar para dar uma renovada
+        st.session_state.incentivo_atual = random.choice(incentivos_do_dia)
         st.rerun()
-        
-    st.markdown("---")
-    st.markdown("🎮 *Dica: Seja programando sistemas ou discutindo lore de games, o Pluto está na escuta.*")
 
 # Tela Principal
 st.title("⚡ Pluto AI")
