@@ -65,7 +65,7 @@ if "incentivo_atual" not in st.session_state:
 # Barra Lateral (Sidebar) com estilo Dev & Gamer
 with st.sidebar:
     st.markdown("### 💻 Pluto.sys")
-    st.caption("v2.3 // AI Assistant Core")
+    st.caption("v2.4 // AI Assistant Core")
     st.markdown("---")
     
     st.markdown("**Status do Sistema:** 🟢 Online")
@@ -119,7 +119,7 @@ else:
         with st.chat_message("user", avatar="⚡"):
             st.markdown(prompt)
 
-        # Resposta da IA com o método padrão e seguro
+        # Resposta da IA usando um modelo estável
         with st.chat_message("assistant", avatar="💻"):
             with st.spinner("Processando dados..."):
                 try:
@@ -131,7 +131,7 @@ else:
                     )
 
                     response = client.models.generate_content(
-                        model='gemini-3.8-flash',
+                        model='gemini-2.5-flash',
                         contents=prompt,
                         config={
                             'system_instruction': system_instruction
