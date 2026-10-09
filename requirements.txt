@@ -1,2 +1,5 @@
 streamlit
 google-genai
+
+pyTelegramBotAPI
+google-genai
