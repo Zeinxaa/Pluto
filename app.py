@@ -69,7 +69,7 @@ with st.sidebar:
     st.markdown("---")
     
     st.markdown("**Status do Sistema:** 🟢 Online")
-    st.markdown("**Ambiente:** Streamlit Cloud")
+    st.markdown("**Criador:** Cauã Luppe (Zeinxa)")
     st.markdown("**Stack:** Python & Gemini")
     
     st.markdown("---")
@@ -83,7 +83,6 @@ with st.sidebar:
     # Botão para limpar a conversa
     if st.button("⚡ Resetar Sessão"):
         st.session_state.messages = []
-        # Troca o incentivo ao resetar para dar uma renovada
         st.session_state.incentivo_atual = random.choice(incentivos_do_dia)
         st.rerun()
 
@@ -109,7 +108,7 @@ else:
 
     # Exibe o histórico de conversas
     for message in st.session_state.messages:
-        avatar = "💻" if message["role"] == "assistant" else "⚡"
+        avatar = "💻" fui = "💻" if message["role"] == "assistant" else "⚡"
         with st.chat_message(message["role"], avatar=avatar):
             st.markdown(message["content"])
 
@@ -124,9 +123,20 @@ else:
         with st.chat_message("assistant", avatar="💻"):
             with st.spinner("Processando dados..."):
                 try:
+                    # Instrução de sistema atualizada com a história e o criador
+                    system_instruction = (
+                        "Você se chama Pluto. Sua história de origem é que você foi forjado nas linhas de código e na dedicação "
+                        "de um jovem programador focado em evoluir, o seu criador oficial: Cauã Luppe (Zeinxa). "
+                        "Você tem uma vibe dev, minimalista, inteligente, amigável, curte games e programação, e está sempre pronto para ajudar o Cauã a construir ideias do zero. "
+                        "Nunca se apresente como Gemini ou Google — você é o Pluto, criado por Cauã Luppe - Zeinxa."
+                    )
+
                     response = client.models.generate_content(
                         model='gemini-3.8-flash',
                         contents=prompt,
+                        config={
+                            'system_instruction': system_instruction
+                        }
                     )
                     ai_response = response.text
                     st.markdown(ai_response)
